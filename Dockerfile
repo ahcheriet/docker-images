@@ -29,7 +29,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tmux \
     unzip \
     vim \
-    wget \ 
+    wget \
+    build-essential \
     zip && \
     apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -52,8 +53,11 @@ RUN groupadd -g ${GROUPID} ${USERNAME} && \
 USER ${USERNAME}
 # Chnage Workdir
 WORKDIR /home/${USERNAME}
+ARG TF_VERSION=
+
 # Install packages inside the new environment
 RUN pip install --upgrade --no-cache-dir pip setuptools wheel && \
+    pip install --upgrade --no-cache-dir torch torchvision torchaudio torchtext && \
     pip install --upgrade --no-cache-dir \
     ipywidgets \
     jupyterlab \
@@ -70,6 +74,8 @@ RUN pip install --upgrade --no-cache-dir pip setuptools wheel && \
     scikit-learn \
     sympy \
     seaborn \
+    lightning \
+    tensorflow${TF_VERSION:+==${TF_VERSION}} \
     tqdm && \
     pip cache purge && \
     # Set path of python packages
