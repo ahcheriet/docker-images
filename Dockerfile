@@ -49,10 +49,6 @@ RUN groupadd -g ${GROUPID} ${USERNAME} && \
     --shell=/bin/bash && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
 
-# Change to your user
-USER ${USERNAME}
-# Chnage Workdir
-WORKDIR /home/${USERNAME}
 ARG TF_VERSION=
 
 # Install packages inside the new environment
@@ -78,3 +74,8 @@ RUN pip install --upgrade --no-cache-dir pip setuptools wheel && \
     tensorflow${TF_VERSION:+==${TF_VERSION}} \
     tqdm && \
     pip cache purge
+
+# Change to your user
+USER ${USERNAME}
+# Chnage Workdir
+WORKDIR /home/${USERNAME}
