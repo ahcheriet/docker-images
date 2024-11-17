@@ -1,29 +1,45 @@
-ARG NGC_VERSION=23.06
-FROM nvcr.io/nvidia/pytorch:${NGC_VERSION}-py3
+FROM matifali/dockerdl:conda
 
-# Install extra packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    htop \
-    nvidia-modprobe \
-    nvtop \
-    sudo \
-    tmux \
-    && \
-    rm -rf /var/lib/apt/lists/
+ARG PYTHON_VER=3.10
+# Change to your user
+USER 1000
 
-# Add a user `${USERNAME}` so that you're not developing as the `root` user
-ARG USERID=1000
-ARG GROUPID=1000
-ARG USERNAME=coder
-RUN groupadd -g ${GROUPID} ${USERNAME} && \
-    useradd ${USERNAME} \
-    --create-home \
-    --uid ${USERID} \
-    --gid ${GROUPID} \
-    --shell=/bin/bash && \
-    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
+# Change Workdir
+WORKDIR ${HOME}
 
-USER ${USERNAME}
-ENV PATH=/home/${USERNAME}/.local/bin:$PATH
-WORKDIR /home/${USERNAME}
+# Create deep-learning environment
+RUN conda create --name DL --channel conda-forge python=${PYTHON_VER} --yes && conda clean --all --yes
+
+# Make new shells activate the DL environment:
+RUN echo "# Make new shells activate the DL environment" >>${HOME}/.bashrc && \
+    echo "conda activate DL" >>${HOME}/.bashrc
+
+# Tensorflow Package version passed as build argument e.g. --build-arg TF_VERSION=2.9.2
+# A blank value will install the latest version
+ARG TF_VERSION=
+
+# Install packages inside the new environment
+RUN conda activate DL && pip install --upgrade --no-cache-dir pip && \
+    pip install --upgrade --no-cache-dir torch torchvision torchaudio torchtext && \
+    pip install --upgrade --no-cache-dir \
+    ipywidgets \
+    jupyterlab \
+    lightning \
+    matplotlib \
+    nltk \
+    numpy \
+    pandas \
+    Pillow \
+    plotly \
+    PyYAML \
+    scipy \
+    scikit-image \
+    scikit-learn \
+    sympy \
+    seaborn \
+    tensorflow${TF_VERSION:+==${TF_VERSION}} \
+    tqdm && \
+    pip cache purge && \
+    # Set path of python packages
+    echo "# Set path of python packages" >>${HOME}/.bashrc && \
+    echo 'export PATH=$HOME/.local/bin:$PATH' >>${HOME}/.bashrc
