@@ -55,6 +55,10 @@ USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 ARG TF_VERSION=
 
+# Set path of python packages
+RUN echo "# Set path of python packages" >>/home/${USERNAME}/.bashrc && \
+    echo 'export PATH=$HOME/.local/bin:$PATH' >>/home/${USERNAME}/.bashrc
+
 # Install packages inside the new environment
 RUN pip install --upgrade --no-cache-dir pip setuptools wheel && \
     pip install --upgrade --no-cache-dir torch torchvision torchaudio torchtext && \
@@ -77,7 +81,4 @@ RUN pip install --upgrade --no-cache-dir pip setuptools wheel && \
     lightning \
     tensorflow${TF_VERSION:+==${TF_VERSION}} \
     tqdm && \
-    pip cache purge && \
-    # Set path of python packages
-    echo "# Set path of python packages" >>/home/${USERNAME}/.bashrc && \
-    echo 'export PATH=$HOME/.local/bin:$PATH' >>/home/${USERNAME}/.bashrc
+    pip cache purge
