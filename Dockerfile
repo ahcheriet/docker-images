@@ -8,7 +8,7 @@ RUN apt-get update \
 	sudo \
 	curl \
         python3 \
-	pip3 \
+	python3-pip \
 	&& rm -rf /var/lib/apt/lists/*
 
 ARG USER=coder
