@@ -16,7 +16,7 @@ RUN useradd --groups sudo --no-create-home --shell /bin/bash ${USER} \
 	&& echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} \
 	&& chmod 0440 /etc/sudoers.d/${USER}
  
-RUN pip3 install jupyter
+RUN pip3 install jupyterlab
 
 USER ${USER}
 WORKDIR /home/${USER}
