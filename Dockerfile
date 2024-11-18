@@ -1,45 +1,17 @@
-FROM matifali/dockerdl:conda
+ARG CUDA_VER=12.4.1
+ARG UBUNTU_VER=22.04
+# Download the base image
+FROM nvidia/cuda:${CUDA_VER}-cudnn-runtime-ubuntu${UBUNTU_VER}
 
-ARG PYTHON_VER=3.10
-# Change to your user
-USER 1000
+RUN apt-get update \
+	&& apt-get install -y \
+	sudo \
+	curl \
+	&& rm -rf /var/lib/apt/lists/*
 
-# Change Workdir
-WORKDIR ${HOME}
-
-# Create deep-learning environment
-RUN conda create --name DL --channel conda-forge python=${PYTHON_VER} --yes && conda clean --all --yes
-
-# Make new shells activate the DL environment:
-RUN echo "# Make new shells activate the DL environment" >>${HOME}/.bashrc && \
-    echo "conda activate DL" >>${HOME}/.bashrc
-
-# Tensorflow Package version passed as build argument e.g. --build-arg TF_VERSION=2.9.2
-# A blank value will install the latest version
-ARG TF_VERSION=
-
-# Install packages inside the new environment
-RUN conda activate DL && pip install --upgrade --no-cache-dir pip && \
-    pip install --upgrade --no-cache-dir torch torchvision torchaudio torchtext && \
-    pip install --upgrade --no-cache-dir \
-    ipywidgets \
-    jupyterlab \
-    lightning \
-    matplotlib \
-    nltk \
-    numpy \
-    pandas \
-    Pillow \
-    plotly \
-    PyYAML \
-    scipy \
-    scikit-image \
-    scikit-learn \
-    sympy \
-    seaborn \
-    tensorflow${TF_VERSION:+==${TF_VERSION}} \
-    tqdm && \
-    pip cache purge && \
-    # Set path of python packages
-    echo "# Set path of python packages" >>${HOME}/.bashrc && \
-    echo 'export PATH=$HOME/.local/bin:$PATH' >>${HOME}/.bashrc
+ARG USER=coder
+RUN useradd --groups sudo --no-create-home --shell /bin/bash ${USER} \
+	&& echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} \
+	&& chmod 0440 /etc/sudoers.d/${USER}
+USER ${USER}
+WORKDIR /home/${USER}
